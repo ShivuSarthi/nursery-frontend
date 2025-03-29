@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const Signup = () => {
+const SignUp = () => {
   const [formData, setFormData] = useState({
     name: "",
     phon_number: "",
@@ -111,4 +111,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default SignUp;

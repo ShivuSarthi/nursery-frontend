@@ -9,8 +9,8 @@ import Login from "./pages/Login";
 import PostPlant from "./pages/PostPlant";
 // import Category from "./pages/Category";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Signup from "./pages/SignUp";
 import SellPlants from "./pages/SellPlants";
+import SignUp from "./pages/SignUp";
 
 function App() {
   return (
@@ -34,7 +34,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/signup" element={<SignUp />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
