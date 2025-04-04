@@ -12,6 +12,17 @@ export const getPlants = async () => {
   }
 };
 
+export const getPlantById = async (plantId) => {
+  try {
+    const response = await api.get(`/plants/${plantId}`);
+    // toast.success("Plants loaded successfully!");
+    return response?.data?.response;
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to load plants");
+    throw error;
+  }
+};
+
 export const createPlant = async (plantData) => {
   try {
     const response = await api.post("/plants", plantData);
@@ -78,3 +89,16 @@ export const deletePlant = async (plantId) => {
     throw error;
   }
 };
+
+// api/plants.js
+
+export const updatePlant = async (plantId, plantData) => {
+  try {
+    const updatePlant = await api.put(`/plants/${plantId}`, plantData);
+    toast.success("Plant updated successfully!");
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to update plant");
+    throw error;
+  }
+};
+// export const updatePlant = (id, plantData) => api.put(`/plants/${id}`, plantData);

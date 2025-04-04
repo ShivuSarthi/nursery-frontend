@@ -30,7 +30,7 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control">
-              <label className="block text-white mb-2">Mobile Number</label>
+              <label className="block text-gray-600 mb-2">Mobile Number</label>
 
               <input
                 type="phon_number"
@@ -42,7 +42,7 @@ const Login = () => {
             </div>
 
             <div className="form-control">
-              <label className="block text-white mb-2">Password</label>
+              <label className="block text-gray-600 mb-2">Password</label>
 
               <input
                 type="password"

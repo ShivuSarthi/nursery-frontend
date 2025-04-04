@@ -1,30 +1,77 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { createSalesData } from "../api/plants";
-
-const validationSchema = Yup.object().shape({
-  quantity: Yup.number().required("Required").min(1, "Must be at least 1"),
-  farmerName: Yup.string().required("Required"),
-  mobile: Yup.string()
-    .required("Required")
-    .matches(/^[0-9]{10}$/, "Invalid mobile number"),
-  place: Yup.string().required("Required"),
-  amount: Yup.number().required("Required").min(0),
-});
+import Joi from "joi";
+import { createSalesData, getPlantById } from "../api/plants"; // Import getPlant
 
 const SellPlants = () => {
   const { plantId } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [currentStock, setCurrentStock] = useState(0); // Add current stock state
+
+  // Fetch plant data to get current stock
+  useEffect(() => {
+    const fetchPlant = async () => {
+      try {
+        const response = await getPlantById(plantId);
+
+        setCurrentStock(response?.stock);
+      } catch (err) {
+        setError("Failed to load plant data");
+      }
+    };
+    fetchPlant();
+  }, [plantId]);
+
+  // Joi validation schema
+  const validationSchema = Joi.object({
+    quantity: Joi.number()
+      .min(1)
+      .max(currentStock)
+      .required()
+      .messages({
+        "number.base": "Quantity must be a number",
+        "number.min": "Must sell at least 1 plant",
+        "number.max": `Cannot exceed available stock of ${currentStock}`,
+        "any.required": "Quantity is required",
+      }),
+    farmerName: Joi.string().required().messages({
+      "string.empty": "Farmer name is required",
+    }),
+    mobile: Joi.string()
+      .pattern(/^[0-9]{10}$/)
+      .required()
+      .messages({
+        "string.pattern.base": "Invalid mobile number (10 digits required)",
+        "string.empty": "Mobile number is required",
+      }),
+    place: Joi.string().required().messages({
+      "string.empty": "Place is required",
+    }),
+    amount: Joi.number().min(0).required().messages({
+      "number.base": "Amount must be a number",
+      "number.min": "Amount cannot be negative",
+      "any.required": "Amount is required",
+    }),
+  });
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       setError("");
+      const { error } = validationSchema.validate(values, {
+        abortEarly: false,
+      });
 
-      // Convert numeric values to numbers
+      if (error) {
+        const errors = {};
+        error.details.forEach((detail) => {
+          errors[detail.path[0]] = detail.message;
+        });
+        throw errors;
+      }
+
       const payload = {
         ...values,
         plantId,
@@ -32,13 +79,18 @@ const SellPlants = () => {
         amount: Number(values.amount),
       };
 
-      const response = await createSalesData(payload);
-
+      await createSalesData(payload);
       navigate("/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed to save sale. Please try again."
-      );
+      if (err.response) {
+        setError(
+          err.response?.data?.message ||
+            "Failed to save sale. Please try again."
+        );
+      } else {
+        // Form validation errors
+        setError("Please fix the errors in the form");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -49,7 +101,7 @@ const SellPlants = () => {
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="text-2xl font-bold mb-6 text-center text-primary">
-            Sell Plants
+            Sell Plants (Stock: {currentStock})
           </h2>
 
           {error && (
@@ -79,27 +131,30 @@ const SellPlants = () => {
               place: "",
               amount: "",
             }}
-            validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting }) => (
+            {({ isSubmitting, errors }) => (
               <Form className="space-y-4">
                 <div>
-                  <label className="block text-white mb-2">Quantity</label>
+                  <label className="block text-gray-600 mb-2">Quantity</label>
                   <Field
                     type="number"
                     name="quantity"
                     className="input input-bordered"
+                    min="1"
+                    max={currentStock}
                   />
                   <ErrorMessage
                     name="quantity"
                     component="div"
-                    className="text-error"
+                    className="text-error text-sm mt-1"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Farmer Name</label>
+                  <label className="block text-gray-600 mb-2">
+                    Farmer Name
+                  </label>
                   <Field
                     type="text"
                     name="farmerName"
@@ -113,7 +168,9 @@ const SellPlants = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2">Mobile Number</label>
+                  <label className="block text-gray-600 mb-2">
+                    Mobile Number
+                  </label>
                   <Field
                     type="text"
                     name="mobile"
@@ -127,7 +184,7 @@ const SellPlants = () => {
                 </div>
 
                 <div>
-                  <label className=" block text-white mb-2">Place</label>
+                  <label className=" block text-gray-600 mb-2">Place</label>
                   <Field
                     type="text"
                     name="place"
@@ -141,7 +198,7 @@ const SellPlants = () => {
                 </div>
 
                 <div>
-                  <label className=" block text-white mb-2">Amount</label>
+                  <label className=" block text-gray-600 mb-2">Amount</label>
                   <Field
                     type="number"
                     name="amount"
@@ -157,9 +214,13 @@ const SellPlants = () => {
                 <button
                   type="submit"
                   className="btn btn-primary mt-6 btn-block rounded-full"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || currentStock === 0}
                 >
-                  {isSubmitting ? "Saving..." : "Save Sale"}
+                  {currentStock === 0
+                    ? "Out of Stock"
+                    : isSubmitting
+                    ? "Saving..."
+                    : "Save Sale"}
                 </button>
               </Form>
             )}

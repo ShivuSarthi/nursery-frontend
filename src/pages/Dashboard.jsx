@@ -103,7 +103,7 @@ const Dashboard = () => {
         </div>
         <div className="card bg-white shadow-md hover:shadow-lg transition-shadow">
           <div className="card-body">
-            <h2 className="card-title text-secondary">Total Plants</h2>
+            <h2 className="card-title text-secondary">Current Batch's</h2>
             <p className="text-4xl font-bold text-primary">
               {stats.totalPlants}
             </p>

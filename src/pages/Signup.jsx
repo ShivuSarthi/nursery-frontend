@@ -42,7 +42,7 @@ const SignUp = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-white mb-2">Full Name</label>
+              <label className="block text-gray-600 mb-2">Full Name</label>
               <input
                 type="text"
                 required
@@ -54,7 +54,7 @@ const SignUp = () => {
             </div>
 
             <div>
-              <label className="block text-white mb-2">phon_number</label>
+              <label className="block text-gray-600 mb-2">phon_number</label>
               <input
                 type="phon_number"
                 required
@@ -66,7 +66,7 @@ const SignUp = () => {
             </div>
 
             <div>
-              <label className="block text-white mb-2">Password</label>
+              <label className="block text-gray-600 mb-2">Password</label>
               <input
                 type="password"
                 required
@@ -79,7 +79,7 @@ const SignUp = () => {
             </div>
 
             <div>
-              <label className="block text-white mb-2">Confirm Password</label>
+              <label className="block text-gray-600 mb-2">Confirm Password</label>
               <input
                 type="password"
                 required
@@ -94,7 +94,7 @@ const SignUp = () => {
               type="submit"
               className="btn btn-primary mt-6 btn-block rounded-full"
             >
-              {/* w-full bg-primary text-white py-2 rounded hover:bg-opacity-90 */}
+              {/* w-full bg-primary text-gray-600 py-2 rounded hover:bg-opacity-90 */}
               Sign Up
             </button>
 

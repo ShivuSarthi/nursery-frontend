@@ -11,6 +11,7 @@ import PostPlant from "./pages/PostPlant";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SellPlants from "./pages/SellPlants";
 import SignUp from "./pages/SignUp";
+import EditPlant from "./pages/EditPlant";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/post" element={<PostPlant />} />
           {/* <Route path="/category/:type" element={<Category />} /> */}
           <Route path="/sell/:plantId" element={<SellPlants />} />
+          <Route path="/edit/:plantId" element={<EditPlant />} />
         </Route>
 
         {/* Catch-all redirect */}

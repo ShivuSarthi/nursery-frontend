@@ -45,7 +45,7 @@ const Home = () => {
       <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="flex justify-center ">
           <h2 className="text-3xl font-bold mb-8 text-primary">
-            Plant Categories
+            Plant Batch's
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

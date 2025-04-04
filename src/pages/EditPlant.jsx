@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createPlant } from "../api/plants";
-import Joi from "joi";
+/* eslint-disable no-unused-vars */
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Joi from 'joi';
+import { getPlantById, updatePlant } from '../api/plants';
 
-const PostPlant = () => {
+const EditPlant = () => {
+  const { plantId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -13,6 +15,28 @@ const PostPlant = () => {
     image: "",
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlantData = async () => {
+      try {
+        const response = await getPlantById(plantId);
+        const plantData = response;
+        setFormData({
+          name: plantData.name,
+          type: plantData.type,
+          stock: plantData.stock,
+          createdAt: plantData.createdAt.split('T')[0],
+          image: plantData.image || ""
+        });
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to load plant data', err);
+        setLoading(false);
+      }
+    };
+    fetchPlantData();
+  }, [plantId]);
 
   const schema = Joi.object({
     name: Joi.string().min(2).required().messages({
@@ -47,26 +71,47 @@ const PostPlant = () => {
     }
 
     try {
-      await createPlant(formData);
+      await updatePlant(plantId, formData);
       navigate("/");
     } catch (error) {
-      console.error("Error creating plant:", error);
+      console.error("Error updating plant:", error);
+      setErrors({ submit: "Failed to update plant. Please try again." });
     }
   };
 
   const handleChange = (field) => (e) => {
     setFormData({ ...formData, [field]: e.target.value });
-    // Clear error when user starts typing
     if (errors[field]) setErrors({ ...errors, [field]: "" });
   };
+
+  if (loading) return <div className="text-center p-8">Loading...</div>;
 
   return (
     <div className="pt-20 min-h-screen flex items-center justify-center bg-base-200">
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
           <h1 className="text-2xl font-bold mb-6 text-center text-primary">
-            Add New Batch
+            Edit Plant
           </h1>
+
+          {errors.submit && (
+            <div className="alert alert-error mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>{errors.submit}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Plant Type */}
@@ -114,7 +159,7 @@ const PostPlant = () => {
               )}
             </div>
 
-            {/* Description */}
+            {/* Date */}
             <div>
               <label className="block text-gray-600 mb-2">Date</label>
               <input
@@ -122,9 +167,8 @@ const PostPlant = () => {
                 value={formData.createdAt}
                 onChange={handleChange("createdAt")}
                 className="input input-bordered w-full"
-                rows="3"
+              
               />
-
               {errors.createdAt && (
                 <p className="text-error text-sm mt-1">{errors.createdAt}</p>
               )}
@@ -148,7 +192,7 @@ const PostPlant = () => {
               type="submit"
               className="btn btn-primary mt-6 btn-block rounded-full"
             >
-              Add Plant
+              Update Plant
             </button>
           </form>
         </div>
@@ -157,4 +201,4 @@ const PostPlant = () => {
   );
 };
 
-export default PostPlant;
+export default EditPlant;
